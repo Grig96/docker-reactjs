@@ -1,8 +1,8 @@
 # build environment
-FROM node:9.6.1 as builder
+FROM node:9.6.1 AS builder
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
-ENV PATH /usr/src/app/node_modules/.bin:$PATH
+ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 COPY package.json /usr/src/app/package.json
 RUN npm install --silent
 RUN npm install react-scripts@1.1.1 -g --silent
