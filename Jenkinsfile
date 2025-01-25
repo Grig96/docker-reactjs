@@ -32,7 +32,7 @@ pipeline {
                     }
                 }
             }
-        }
+        
 
         stage('Push Docker Image') {
             steps {
@@ -41,7 +41,7 @@ pipeline {
                     }
                 }
             }
-        }
+        
 
         stage('Clean Up') {
             steps {
