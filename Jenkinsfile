@@ -5,13 +5,14 @@ pipeline {
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_IMAGE_NAME = 'greeg/node-webapp'
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials' // Jenkins credential ID
-        tool name: 'docker', type: 'dockerTool'
+        
     }
 
     stages {
         stage('Checkout Code') {
             steps {
                 checkout scm
+                tool name: 'docker', type: 'dockerTool'
             }
         }
 
