@@ -10,14 +10,14 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 checkout scm
-                tool name: 'docker', type: 'dockerTool'
+                dockerPath = tool name: 'docker', type: 'dockerTool'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t "${DOCKER_IMAGE_NAME}:latest" .'
+                    sh '${dockerPath} build -t "${DOCKER_IMAGE_NAME}:latest" .'
                 }
             }
         }
@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')]) {
-                    sh 'docker login  -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"'
+                    sh '${dockerPath} login  -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"'
                         echo 'Logged in to Docker Hub'
                     }
                     }
@@ -37,7 +37,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    sh 'docker push ${DOCKER_IMAGE_NAME}'
+                    sh '${dockerPath} push ${DOCKER_IMAGE_NAME}'
                     }
                 }
             }
@@ -46,7 +46,7 @@ pipeline {
         stage('Clean Up') {
             steps {
                 script {
-                    sh 'docker system prune -f'
+                    sh '${dockerPath} system prune -f'
                 }
             }
         }
