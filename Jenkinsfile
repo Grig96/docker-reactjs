@@ -3,9 +3,7 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = 'docker.io'
-        DOCKER_IMAGE_NAME = 'greeg/node-webapp'
-        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials' // Jenkins credential ID
-        
+        DOCKER_IMAGE_NAME = 'greeg/node-webapp'        
     }
 
     stages {
@@ -19,7 +17,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE_NAME}:latest")
+                    sh 'docker build -t ("${DOCKER_IMAGE_NAME}:latest") .'
                 }
             }
         }
@@ -27,8 +25,10 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS_ID}") {
+                    withCredentials([usernamePassword(credentialsId: 'docker-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')]) {
+                    sh 'docker login  -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"
                         echo 'Logged in to Docker Hub'
+                    }
                     }
                 }
             }
@@ -37,8 +37,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${DOCKER_IMAGE_NAME}:latest").push()
+                    sh 'docker push ${DOCKER_IMAGE_NAME}'
                     }
                 }
             }
