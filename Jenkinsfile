@@ -1,9 +1,13 @@
 pipeline {
-    agent { label 'docker' }
+    agent {
+        docker {
+            image 'docker:latest'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
-        // Use the credentials ID for Docker Hub
-        DOCKER_HUB_CREDENTIALS = credentials('docker-creds')
+        DOCKER_IMAGE_NAME = "greeg/node-webapp"
     }
 
     stages {
@@ -18,8 +22,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image and tag it with the build ID
-                    dockerImage = docker.build("greeg/node-webapp:${env.BUILD_ID}")
+                    def dockerImage = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}")
                 }
             }
         }
@@ -28,7 +31,6 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Authenticate with Docker Hub and push the image
                     docker.withRegistry('https://registry.hub.docker.com', 'docker-creds') {
                         dockerImage.push()
                     }
@@ -36,12 +38,14 @@ pipeline {
             }
         }
 
-        // Stage 4: Push with 'latest' tag (optional)
+        // Stage 4: Push with 'latest' tag
         stage('Push Latest Tag') {
             steps {
                 script {
-                    // Tag the image as 'latest' and push it
-                    dockerImage.push('latest')
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-creds') {
+                        dockerImage.tag('latest')
+                        dockerImage.push('latest')
+                    }
                 }
             }
         }
