@@ -11,7 +11,7 @@ pipeline {
         // Stage 1: Checkout code from Git
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-username/your-repo.git'
+                checkout scm
             }
         }
 
@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image and tag it with the build ID
-                    dockerImage = docker.build("your-dockerhub-username/your-image-name:${env.BUILD_ID}")
+                    dockerImage = docker.build("greeg/node-webapp:${env.BUILD_ID}")
                 }
             }
         }
@@ -56,4 +56,3 @@ pipeline {
             echo 'Pipeline failed. Check the logs for details.'
         }
     }
-}
