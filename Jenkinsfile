@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    gent {
+    docker {
+      image 'docker:dind'
+      args '--privileged'
+    }
+  }
 
     environment {
         DOCKER_REGISTRY = 'docker.io'
