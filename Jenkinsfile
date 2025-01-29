@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_NAME = "greeg/node-webapp"
+        DOCKER_CLI_ACI = "0"
     }
 
     stages {
