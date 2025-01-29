@@ -1,29 +1,30 @@
 pipeline {
-    agent {label "docker-mac"}
+    agent { label "docker-mac" }
 
     environment {
         DOCKER_IMAGE_NAME = "greeg/node-webapp"
         DOCKER_CLI_ACI = "0"
     }
 
+    // ✅ Define dockerImage as a global variable
+    def dockerImage
+
     stages {
-        // Stage 1: Checkout code from Git
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        // Stage 2: Build Docker image
         stage('Build Docker Image') {
             steps {
                 script {
-                    def dockerImage = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}")
+                    // ✅ Assign the global variable instead of using "def"
+                    dockerImage = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}")
                 }
             }
         }
 
-        // Stage 3: Push Docker image to Docker Hub
         stage('Push Docker Image') {
             steps {
                 script {
@@ -34,7 +35,6 @@ pipeline {
             }
         }
 
-        // Stage 4: Push with 'latest' tag
         stage('Push Latest Tag') {
             steps {
                 script {
