@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-    docker {
-      image 'docker:dind'
-      args '--privileged'
-    }
+    agent { label 'docker' }
   }
 
     environment {
