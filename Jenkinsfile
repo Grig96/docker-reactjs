@@ -6,9 +6,6 @@ pipeline {
         DOCKER_CLI_ACI = "0"
     }
 
-    // ✅ Define dockerImage as a global variable
-    def dockerImage
-
     stages {
         stage('Checkout') {
             steps {
@@ -19,8 +16,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // ✅ Assign the global variable instead of using "def"
-                    dockerImage = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}")
+                    // ✅ Store dockerImage as an environment variable
+                    env.DOCKER_IMAGE_TAG = "${DOCKER_IMAGE_NAME}:${env.BUILD_ID}"
+                    docker.build(env.DOCKER_IMAGE_TAG)
                 }
             }
         }
@@ -29,7 +27,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker-creds') {
-                        dockerImage.push()
+                        docker.image(env.DOCKER_IMAGE_TAG).push()
                     }
                 }
             }
@@ -39,8 +37,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker-creds') {
-                        dockerImage.tag('latest')
-                        dockerImage.push('latest')
+                        docker.image(env.DOCKER_IMAGE_TAG).tag('latest')
+                        docker.image(env.DOCKER_IMAGE_TAG).push('latest')
                     }
                 }
             }
