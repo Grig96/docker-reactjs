@@ -1,6 +1,5 @@
 pipeline {
     agent { label 'docker' }
-  }
 
     environment {
         // Use the credentials ID for Docker Hub
@@ -56,3 +55,4 @@ pipeline {
             echo 'Pipeline failed. Check the logs for details.'
         }
     }
+}
