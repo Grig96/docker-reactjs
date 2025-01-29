@@ -1,5 +1,5 @@
 pipeline {
-    gent {
+    agent {
     docker {
       image 'docker:dind'
       args '--privileged'
@@ -7,51 +7,46 @@ pipeline {
   }
 
     environment {
-        DOCKER_REGISTRY = 'docker.io'
-        DOCKER_IMAGE_NAME = 'greeg/node-webapp'        
+        // Use the credentials ID for Docker Hub
+        DOCKER_HUB_CREDENTIALS = credentials('docker-creds')
     }
 
     stages {
-        stage('Checkout Code') {
+        // Stage 1: Checkout code from Git
+        stage('Checkout') {
             steps {
-                checkout scm
-                dockerPath = tool name: 'docker', type: 'dockerTool'
+                git branch: 'main', url: 'https://github.com/your-username/your-repo.git'
             }
         }
 
+        // Stage 2: Build Docker image
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh '${dockerPath} build -t "${DOCKER_IMAGE_NAME}:latest" .'
+                    // Build the Docker image and tag it with the build ID
+                    dockerImage = docker.build("your-dockerhub-username/your-image-name:${env.BUILD_ID}")
                 }
             }
         }
 
-        stage('Login to Docker Hub') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')]) {
-                    sh '${dockerPath} login  -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"'
-                        echo 'Logged in to Docker Hub'
-                    }
-                    }
-                }
-            }
-        
-
+        // Stage 3: Push Docker image to Docker Hub
         stage('Push Docker Image') {
             steps {
                 script {
-                    sh '${dockerPath} push ${DOCKER_IMAGE_NAME}'
+                    // Authenticate with Docker Hub and push the image
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-creds') {
+                        dockerImage.push()
                     }
                 }
             }
-        
+        }
 
-        stage('Clean Up') {
+        // Stage 4: Push with 'latest' tag (optional)
+        stage('Push Latest Tag') {
             steps {
                 script {
-                    sh '${dockerPath} system prune -f'
+                    // Tag the image as 'latest' and push it
+                    dockerImage.push('latest')
                 }
             }
         }
@@ -62,7 +57,7 @@ pipeline {
             echo 'Docker image built and pushed successfully!'
         }
         failure {
-            echo 'Pipeline failed.'
+            echo 'Pipeline failed. Check the logs for details.'
         }
     }
 }
