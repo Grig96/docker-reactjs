@@ -1,5 +1,5 @@
 pipeline {
-    agent { label "docker-mac" }
+    agent { label "static-docker" }
 
     environment {
         DOCKER_IMAGE_NAME = "greeg/node-webapp"
