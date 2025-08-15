@@ -30,11 +30,11 @@ export default class MainContainer extends Component {
       
       let data = result.data;
       let coins = [];
-      Object.keys(data).map((k,i) => {
-        if(data[k].last){
+      Object.keys(data).forEach((k, i) => {
+        if (data[k].last) {
           coins.push(data[k]);
         }
-      });
+    });
       this.setState({coins:coins});
     });
   }
